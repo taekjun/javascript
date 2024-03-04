@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.yedam.reply.mapper.ReplyMapper">
+
+	<select id="selectList" parameterType="int" resultType="reply">
+		select reply_no,
+		       board_no,
+		       reply,
+		       replyer,
+		       reply_date
+		from tbl_reply
+		where board_no = #{bno}
+		order by reply_no
+	</select>
+
+	<insert id="insertReply" parameterType="reply">
+		insert into tbl_reply (reply_no,
+		                       board_no,
+		                       reply,
+		                       replyer,
+		                       reply_date) 
+		values (reply_seq.nextval,
+		        #{boardNo},
+		        #{reply},
+		        #{replyer},
+		        sysdate)
+	</insert>
+	
+	<delete id="deleteReply" parameterType="int">
+		delete tbl_reply
+		where reply_no = #{rno}
+	
+	</delete>
+</mapper>
