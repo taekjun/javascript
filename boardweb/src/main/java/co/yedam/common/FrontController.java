@@ -27,7 +27,10 @@ import co.yedam.member.control.LoginControl;
 import co.yedam.member.control.LoginForm;
 import co.yedam.member.control.LogoutControl;
 import co.yedam.member.control.MemberListControl;
+import co.yedam.reply.control.AddReplyControl;
+import co.yedam.reply.control.RemoveReplyControl;
 import co.yedam.reply.control.ReplyListControl;
+import co.yedam.reply.control.ReplyTotalCount;
 
 // init -> service -> destroy
 public class FrontController extends HttpServlet {
@@ -80,6 +83,9 @@ public class FrontController extends HttpServlet {
 		
 		// 댓글관련.
 		controls.put("/replyList.do", new ReplyListControl());
+		controls.put("/removeReply.do", new RemoveReplyControl());
+		controls.put("/addReply.do", new AddReplyControl());
+		controls.put("/getTotal.do", new ReplyTotalCount());
 	}
 	
 	// service. 호출 요청이 있을때마다 실행.

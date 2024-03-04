@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.session.SqlSession;
 
 import co.yedam.common.DataSource;
+import co.yedam.common.SearchVO;
 import co.yedam.reply.Reply;
 import co.yedam.reply.mapper.ReplyMapper;
 
@@ -12,8 +13,8 @@ public class ReplyServiceImpl implements ReplyService {
 	SqlSession session = DataSource.getInstance().openSession(true);
 	ReplyMapper mapper = session.getMapper(ReplyMapper.class);
 	
-	public List<Reply> replyList(int bno) {
-		return mapper.selectList(bno);
+	public List<Reply> replyList(SearchVO search) {
+		return mapper.selectList(search);
 	}
 	
 	public boolean addReply(Reply reply) {
@@ -22,5 +23,10 @@ public class ReplyServiceImpl implements ReplyService {
 	
 	public boolean removeReply(int rno) {
 		return mapper.deleteReply(rno) == 1;
+	}
+	
+	@Override
+	public int totalCount(int bno) {
+		return mapper.selectCount(bno);
 	}
 }
