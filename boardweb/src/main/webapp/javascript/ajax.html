@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div id="show"></div>
+	<script>
+		var listFunc; // undefined.
+		console.log('javascript/ajax.html')
+		
+		// 비동기방식처리.
+		setTimeout(function() {
+			//console.log('hello-1')
+			
+			setTimeout(function() {
+				//console.log('hello-2')
+				
+				setTimeout(function() {
+					//console.log('hello-3')
+				}, 2000);
+			}, 3000);
+		}, 1000);
+		
+		// 목록출력.
+
+		fetch('../replyList.do?bno='+ 164 +'&page=' + 1)			
+		.then(resolve => resolve.json()) // 문자열 -> 객체. (파싱해서 자바객체로)
+		.then(listFunc)
+		.catch(function(err) {
+			console.log('error==>', err);
+		})
+		
+		function listFunc(result) {
+			result.forEach(reply => {
+				console.log(reply); // []
+				let li = document.createElement('li');
+				li.innerText = reply.reply;
+				document.querySelector('#show').append(li);
+			})
+		}
+		/* // 등록.
+		fetch('../addReply.do', {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'bno='+ 164 +'&reply='+ 'fetch test' + '&replyer=' + 'newbie'
+		})
+		.then(resolve => resolve.json())
+		.then(result => {
+			if(result.retCode == 'OK') {
+				alert('성공')
+			} else {
+				alert('실패')
+			}
+		})
+		.catch(err => console.log(err)); */
+		
+		
+		
+	</script>
+</body>
+</html>

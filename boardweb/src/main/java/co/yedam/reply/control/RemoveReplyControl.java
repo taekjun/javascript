@@ -27,10 +27,10 @@ public class RemoveReplyControl implements Control {
 		Map<String, String> map = new HashMap<>();
 		
 		if(svc.removeReply(Integer.parseInt(rno))) {
-			map.put("retCod", "OK");
+			map.put("retCode", "OK");
 			map.put("retMsg", "정상적으로 삭제되었습니다");
 		} else {
-			map.put("retCod", "NG");
+			map.put("retCode", "NG");
 			map.put("retMsg", "삭제할 글번호가 없습니다");
 		}
 		Gson gson = new GsonBuilder().create();

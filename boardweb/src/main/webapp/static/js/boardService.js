@@ -9,33 +9,46 @@ function pagingFunc() {
 			console.log(item);
 			item.addEventListener('click', function(e) {
 				e.preventDefault(); // 링크의 기능 차단.
-				page = item.innerText; // page로 사용.
-				replyList(page);
-				pageList();
+				//page = item.innerText; // page로 사용.
+				page = item.dataset.page; // item.getAttribute('data-page')
+				replyList(page); // 링크 클릭할때마다 목록을 새롭게.
+				pageList(); // 페이지 목록을 새롭게.
 			})
 		});
 }
 
 // 등록이벤트.
 document.querySelector('.addReply').addEventListener('click', addReplyFnc);
-function addReplyFnc(e) {
+async function addReplyFnc(e) {
 	let reply = document.querySelector('input[name="reply"]').value;
-	
-	const addHtp = new XMLHttpRequest();
-	addHtp.open('post', 'addReply.do');
-	addHtp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	addHtp.send('bno='+bno+'&reply='+reply+'&replyer='+replyer);
-	addHtp.onload = function(e) {
-		let result = JSON.parse(addHtp.responseText);
-		console.log(result);
-		if(result.retCode == 'OK') {
-			alert('등록성공')
-			document.querySelector('.reply ul').appendChild(makeRow(result.retVal));
+	if (!reply) {
+		alert('댓글을 입력하세요')
+		return;
+	}
+	// ajax호출
+	try {
+		let resolve = await fetch('addReply.do', {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'bno=' + bno + '&reply=' + reply + '&replyer=' + replyer
+		});
+		let result = await resolve.json();
+		if (result.retCode == 'OK') {
+			alert('등록성공');
 			document.querySelector('#reply').value = '';
+			resolve = await fetch('getTotal.do?bno=' + bno)
+			result = await resolve.json();
+			page = Math.ceil(result.totalCount / 5);
+			replyList(page);
+			pageList();
 		} else {
 			alert('등록실패')
 		}
-	}
+	} catch (err) {
+		console.log(err);
+	} //end of ajax호출.
 }
 // 댓글 목록.
 function makeRow(obj = {}) {
@@ -77,88 +90,106 @@ function makeRow2(obj = {}) {
 	return clon;
 }
 // 삭제함수.
-function deleteRow(e) {
+async function deleteRow(e) {
 	let rno = this.parentElement.parentElement.dataset.rno;
-	let li = this.parentElement.parentElement;
-	
-	const delHtp = new XMLHttpRequest();
-	delHtp.open('post', 'removeReply.do');
-	delHtp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	delHtp.send('rno='+rno);	
-	delHtp.onload = function (e) {
-		console.log(delHtp);
-		const result = JSON.parse(delHtp.responseText);
+	//let li = this.parentElement.parentElement;
+
+	// 작성자&로그인 계정 비교
+	let writer = this.parentElement.previousElementSibling.innerText;
+	if (replyer != writer) {
+		alert('삭제권한이 없습니다.')
+		return;
+	}
+
+	// ajax호출.
+	try {
+		let resolve = await fetch('removeReply.do', {
+			method: 'post',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: 'rno=' + rno
+		})
+		let result = await resolve.json()
 		if (result.retCode == 'OK') {
 			alert(result.retMsg);
-			li.remove();
+			replyList(page);
+			pageList();
 		} else {
 			alert(result.retMsg);
 		}
+	} catch (err) {
+		console.log(err);
 	}
 }
 
 // 목록함수.
 function replyList(rpage = 1) {
-	const xhtp = new XMLHttpRequest();
-	xhtp.open('get','replyList.do?bno='+bno+'&page='+rpage);
-	xhtp.send();
-	xhtp.onload = function(e) {
-		console.log(xhtp.responseText);
-		const data = JSON.parse(xhtp.responseText);
-		// 기존목록 삭제.
-		document.querySelectorAll('li[data-rno]').forEach(item => item.remove());
-		// 목록.
-		data.forEach(item => {
-			document.querySelector('.reply ul').appendChild(makeRow(item));
+	fetch('replyList.do?bno=' + bno + '&page=' + rpage)
+		.then(resolve => resolve.json())
+		.then(data => {
+			// 기존목록 삭제.
+			document.querySelectorAll('li[data-rno]').forEach(item => item.remove());
+			// 목록.
+			data.forEach(item => {
+				document.querySelector('.reply ul').appendChild(makeRow2(item));
+			})
+			// 페이지가 없을경우.
+			if (!data.length && page > 1) {
+				page--;
+				replyList(page);
+				pageList();
+			}
 		})
-	}
+		.catch(err => console.log(err));
 }
 replyList();
 
 // 페이징 목록.
 function pageList() {
-	const plistHtp = new XMLHttpRequest();
-	plistHtp.open('get', 'getTotal.do?bno=' + bno);
-	plistHtp.send();
-	plistHtp.onload = function(e) {
-		// 기존 페이지 삭제
-		document.querySelector('div.pagination').innerHTML = '';
-		
-		let result = JSON.parse(plistHtp.responseText);
-		let totalCnt = result.totalCount;
-		let startPage, endPage; // 1~5,6~10
-		let next, prev;
-		let realEnd = Math.ceil(totalCnt / 5);
-		endPage = Math.ceil(page / 5) * 5;
-		startPage = endPage - 4;
-		endPage = endPage > realEnd ? realEnd : endPage;
-		next = endPage < realEnd ? true : false;
-		prev = startPage > 1;
-		
-		if (prev) {
-			let aTag = document.createElement('a');
-			//aTag.innerText = startPage - 1;
-			aTag.innerHTML = '&laquo';
-			aTag.href = "#";
-			document.querySelector('div.pagination').appendChild(aTag);
-		}
-		for(let p = startPage; p <= endPage; p++) {
-			let aTag = document.createElement('a');
-			aTag.innerText = p;
-			aTag.href = "#";
-			if (p == page) {
-				aTag.className = 'active';
+	fetch('getTotal.do?bno=' + bno)
+		.then(resolve => resolve.json())
+		.then(result => {
+			// 기존 페이지 삭제
+			document.querySelector('div.pagination').innerHTML = '';
+
+			let totalCnt = result.totalCount;
+			let startPage, endPage; // 1~5,6~10
+			let next, prev;
+			let realEnd = Math.ceil(totalCnt / 5);
+			endPage = Math.ceil(page / 5) * 5;
+			startPage = endPage - 4;
+			endPage = endPage > realEnd ? realEnd : endPage;
+			next = endPage < realEnd ? true : false;
+			prev = startPage > 1;
+
+			if (prev) {
+				let aTag = document.createElement('a');
+				//aTag.innerText = startPage - 1;
+				aTag.innerHTML = '&laquo';
+				aTag.href = "#";
+				aTag.setAttribute('data-page', startPage - 1);
+				document.querySelector('div.pagination').appendChild(aTag);
 			}
-			document.querySelector('div.pagination').appendChild(aTag);
-		}
-		if (next) {
-			let aTag = document.createElement('a');
-			//aTag.innerText = endPage + 1;
-			aTag.innerHTML = '&raquo';
-			aTag.href = "#";
-			document.querySelector('div.pagination').appendChild(aTag);
-		}
-		pagingFunc(); // 새로 생성된 a태그에 이벤트 등록.
-	}
+			for (let p = startPage; p <= endPage; p++) {
+				let aTag = document.createElement('a');
+				aTag.innerText = p;
+				aTag.href = "#";
+				aTag.setAttribute('data-page', p);
+				if (p == page) {
+					aTag.className = 'active';
+				}
+				document.querySelector('div.pagination').appendChild(aTag);
+			}
+			if (next) {
+				let aTag = document.createElement('a');
+				//aTag.innerText = endPage + 1;
+				aTag.innerHTML = '&raquo';
+				aTag.href = "#";
+				aTag.setAttribute('data-page', endPage + 1)
+				document.querySelector('div.pagination').appendChild(aTag);
+			}
+			pagingFunc(); // 새로 생성된 a태그에 이벤트 등록.
+		})
 }
 pageList();
