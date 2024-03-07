@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>jquery2.html</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+	Todo:
+	<input id="userVal">
+	<button id="addBtn">추가</button>
+	<br />
+	<ul id="list"></ul>
+	
+	<hr />
+	학번: <input id="sno">
+	이름: <input id="sname">
+	점수: <input id="score">
+	<button class="addBtn">등록</button>
+	<table border="1">
+		<thead>
+			<tr>
+				<th><input type="checkbox"></th>
+				<th>학번</th>
+				<th>이름</th>
+				<th>점수</th>
+			</tr>		
+		</thead>
+		<tbody id="list">
+			<tr><td><input type="checkbox"></td>
+				<td>학번</td>
+				<td>이름</td>
+				<td>점수</td></tr>
+			<tr><td><input type="checkbox"></td>
+				<td>학번</td>
+				<td>이름</td>
+				<td>점수</td></tr>
+		</tbody>
+	</table>
+	
+	<script>
+		$('#addBtn').on('click', function(e) {
+			let val = $('#userVal').val();
+			let delBtn = $('<button>삭제</button>')
+			delBtn.on('click', function(e) {
+				delBtn.parent().remove();
+			})
+			
+			$('#list').append($('<li />').text(val).append(delBtn)); // <li>홍길동<button>삭제</button></li>
+			$('#userVal').val('');
+		})
+
+		// 체크박스 change 이벤트.
+		$('thead input[type="checkbox"]').on('change', function(e) {
+			console.log($(this).prop('checked'));
+			let trueOrFalse = $(this).prop('checked');
+			$('tbody input[type="checkbox"]').prop('checked', trueOrFalse);
+
+		})
+
+		// 등록버튼.
+		$('.addBtn').on('click', function(e) {
+			let sno = $('#sno').val();
+			let sname = $('#sname').val();
+			let score = $('#score').val();
+			
+			$('tbody#list').append(
+					$('<tr />').append(
+						$('<td />').append(
+							$('<input />').attr('type', 'checkbox')),
+						$('<td />').text(sno),
+						$('<td />').text(sname),
+						$('<td />').text(score)));
+
+			$('#sno').val('');
+			$('#sname').val('');
+			$('#score').val('');
+		})
+	</script>
+</body>
+</html>
