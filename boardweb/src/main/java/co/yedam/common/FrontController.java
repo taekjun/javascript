@@ -90,6 +90,7 @@ public class FrontController extends HttpServlet {
 		controls.put("/registerCenter.do", new RegisterCenter());
 		controls.put("/getSidoInfo.do", new SidoInfoControl());
 		
+		controls.put("/dataTable.do", new DataTableControl());
 	}
 	
 	// service. 호출 요청이 있을때마다 실행.

@@ -1,5 +1,5 @@
 /**
- * boardService.js 
+ * boardService.js 자바스크립트 기반
  */
 // .pagination>a click이벤트.
 let page = 1;
@@ -35,12 +35,13 @@ async function addReplyFnc(e) {
 			body: 'bno=' + bno + '&reply=' + reply + '&replyer=' + replyer
 		});
 		let result = await resolve.json();
+		
 		if (result.retCode == 'OK') {
 			alert('등록성공');
 			document.querySelector('#reply').value = '';
 			resolve = await fetch('getTotal.do?bno=' + bno)
 			result = await resolve.json();
-			page = Math.ceil(result.totalCount / 5);
+			page = Math.ceil(result.totalCount / 5); // 등록 후 마지막 페이지로 이동.
 			replyList(page);
 			pageList();
 		} else {

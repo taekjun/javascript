@@ -41,4 +41,9 @@ public class ReplyServiceImpl implements ReplyService {
 	public List<Map<String, Object>> getCntSido() {
 		return mapper.countPerSido();
 	}
+	
+	@Override
+	public List<Reply> replyList2(int bno) {
+		return mapper.selectList2(bno);
+	}
 }

@@ -30,7 +30,7 @@ public class AddBookControl implements Control {
 		book.setPress(press);
 		book.setPrice(Integer.parseInt(price));
 		BoardService svc = new BoardServiceImpl();
-
+		
 		try {
 			if (svc.addBook(book)) {
 				// {"retCode": "OK"}
